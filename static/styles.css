@@ -1,0 +1,106 @@
+:root {
+  color-scheme: dark;
+  --ink: #f1f7f3;
+  --muted: #91a49a;
+  --surface: #0c1a14;
+  --line: rgba(191, 255, 215, 0.14);
+  --accent: #7dffad;
+  --accent-2: #d5ff71;
+}
+
+* { box-sizing: border-box; }
+
+html, body { min-height: 100%; }
+
+body {
+  margin: 0;
+  background:
+    radial-gradient(circle at 85% 3%, rgba(84, 222, 139, 0.15), transparent 34rem),
+    linear-gradient(155deg, #07110d 0%, #09140f 48%, #050b08 100%);
+  color: var(--ink);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+.shell {
+  width: min(100%, 520px);
+  min-height: 100svh;
+  margin: 0 auto;
+  padding: max(28px, env(safe-area-inset-top)) 22px max(24px, env(safe-area-inset-bottom));
+  display: flex;
+  flex-direction: column;
+}
+
+header { position: relative; padding-top: 38px; }
+
+.mark {
+  position: absolute;
+  top: 0;
+  right: 4px;
+  height: 35px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.mark span { width: 3px; border-radius: 9px; background: var(--accent); animation: wave 1.2s ease-in-out infinite; }
+.mark span:nth-child(1) { height: 11px; animation-delay: -.2s; }
+.mark span:nth-child(2) { height: 27px; animation-delay: -.55s; }
+.mark span:nth-child(3) { height: 18px; animation-delay: -.35s; }
+.mark span:nth-child(4) { height: 32px; animation-delay: -.7s; }
+
+@keyframes wave { 50% { transform: scaleY(.45); opacity: .65; } }
+
+.eyebrow { margin: 0 0 13px; color: var(--accent); font: 700 11px/1.2 ui-monospace, SFMono-Regular, monospace; letter-spacing: .18em; }
+h1 { margin: 0; font-size: clamp(45px, 13vw, 68px); line-height: .96; letter-spacing: -.065em; font-weight: 710; }
+h1 em { color: var(--accent-2); font-family: Georgia, serif; font-weight: 400; }
+.lede { max-width: 340px; margin: 20px 0 30px; color: var(--muted); font-size: 16px; line-height: 1.5; }
+
+.player {
+  padding: 20px;
+  border: 1px solid var(--line);
+  border-radius: 25px;
+  background: linear-gradient(145deg, rgba(18, 38, 29, .93), rgba(8, 18, 13, .93));
+  box-shadow: 0 25px 80px rgba(0, 0, 0, .35), inset 0 1px rgba(255,255,255,.04);
+}
+
+.status-line { display: grid; grid-template-columns: 10px 1fr auto; align-items: center; gap: 11px; }
+.status-dot { width: 9px; height: 9px; border-radius: 50%; background: #738178; box-shadow: 0 0 0 5px rgba(115,129,120,.09); }
+.status-dot.live { background: var(--accent); box-shadow: 0 0 0 5px rgba(125,255,173,.1), 0 0 20px rgba(125,255,173,.55); }
+.status-dot.error { background: #ff776f; }
+.label { margin: 0; color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: .1em; }
+.value { margin: 3px 0 0; font-size: 15px; font-weight: 650; }
+.latency { color: var(--muted); font: 12px ui-monospace, SFMono-Regular, monospace; }
+
+#meter { display: block; width: 100%; height: 82px; margin: 18px 0; }
+
+button {
+  width: 100%; min-height: 58px; border: 0; border-radius: 16px;
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  color: #07110d; background: var(--accent); font: 750 16px/1 -apple-system, sans-serif;
+  box-shadow: 0 10px 28px rgba(46, 196, 104, .18); cursor: pointer;
+  -webkit-tap-highlight-color: transparent; transition: transform .15s, filter .15s;
+}
+button:active { transform: scale(.985); }
+button.stop { background: #e7eee9; }
+button svg { width: 21px; height: 21px; fill: currentColor; }
+
+.volume-row { display: grid; grid-template-columns: 20px 1fr 42px; align-items: center; gap: 10px; margin-top: 20px; }
+.volume-row svg { width: 19px; fill: var(--muted); }
+.volume-row output { color: var(--muted); text-align: right; font: 12px ui-monospace, SFMono-Regular, monospace; }
+input[type="range"] { width: 100%; accent-color: var(--accent); }
+
+aside { margin: 18px 3px 0; padding: 14px 16px; border-left: 2px solid var(--accent-2); color: var(--muted); font-size: 13px; line-height: 1.5; }
+aside p { margin: 0; }
+aside strong { color: var(--ink); }
+footer { margin-top: auto; padding-top: 28px; display: flex; justify-content: space-between; gap: 12px; color: #66756d; font-size: 11px; }
+
+@media (max-height: 690px) {
+  header { padding-top: 14px; }
+  .mark { top: -10px; }
+  .lede { margin: 14px 0 20px; }
+  aside { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) { .mark span { animation: none; } }
+
