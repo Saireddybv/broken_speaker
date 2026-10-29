@@ -3,7 +3,7 @@ $ErrorActionPreference = 'Stop'
 Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName System.Drawing
 [System.Windows.Forms.Application]::EnableVisualStyles()
-$projectPath = $PSScriptRoot
+$projectPath = Split-Path -Parent $PSScriptRoot
 $pythonPath = Join-Path $projectPath '.venv\Scripts\python.exe'
 if (-not (Test-Path -LiteralPath $pythonPath)) { throw 'Run setup-tray.ps1 first.' }
 if ($Check) { Write-Output 'Tray prerequisites OK'; exit 0 }
@@ -40,7 +40,7 @@ function Update-PhoneQR([string]$url) {
     if (-not $url.StartsWith('http://')) { return }
     try {
         $pngPath = Join-Path $logPath 'phone-qr.png'
-        $qrProcess = Start-Process -FilePath $pythonPath -ArgumentList @(('"' + (Join-Path $projectPath 'make-qr.py') + '"'), ('"' + $url + '"'), ('"' + $pngPath + '"')) -WindowStyle Hidden -PassThru
+        $qrProcess = Start-Process -FilePath $pythonPath -WorkingDirectory $projectPath -ArgumentList @('-m', 'broken_speaker.qr', ('"' + $url + '"'), ('"' + $pngPath + '"')) -WindowStyle Hidden -PassThru
         if (-not $qrProcess.WaitForExit(5000)) { $qrProcess.Kill(); throw 'QR generation timed out' }
         if ($qrProcess.ExitCode -ne 0) { throw 'QR generation failed' }
         $sourceImage = [System.Drawing.Image]::FromFile($pngPath)
@@ -95,7 +95,7 @@ function Start-Audio {
             finally { $listener.Stop() }
         }
         if (-not $selected) { throw 'Ports 8000-8010 are busy.' }
-        $script:server = Start-Process -FilePath $pythonPath -ArgumentList @('-u', ('"' + (Join-Path $projectPath 'app.py') + '"'), '--port', $script:port) -WorkingDirectory $projectPath -WindowStyle Hidden -RedirectStandardOutput (Join-Path $logPath 'server.log') -RedirectStandardError (Join-Path $logPath 'server-error.log') -PassThru
+        $script:server = Start-Process -FilePath $pythonPath -ArgumentList @('-u', '-m', 'broken_speaker', '--port', $script:port) -WorkingDirectory $projectPath -WindowStyle Hidden -RedirectStandardOutput (Join-Path $logPath 'server.log') -RedirectStandardError (Join-Path $logPath 'server-error.log') -PassThru
         Update-Status
     } catch { [System.Windows.Forms.MessageBox]::Show($_.Exception.Message, 'Could not start audio') | Out-Null }
 }
@@ -111,10 +111,10 @@ function Set-StartupLink {
         $shell = New-Object -ComObject WScript.Shell
         $shortcut = $shell.CreateShortcut($startupLink)
         $shortcut.TargetPath = "$env:SystemRoot\System32\WindowsPowerShell\v1.0\powershell.exe"
-        $shortcut.Arguments = '-NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -STA -File "' + (Join-Path $projectPath 'tray.ps1') + '"'
+        $shortcut.Arguments = '-NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -STA -File "' + (Join-Path $PSScriptRoot 'tray.ps1') + '"'
         $shortcut.WorkingDirectory = $projectPath
         $shortcut.WindowStyle = 7
-        $shortcut.IconLocation = (Join-Path $projectPath 'broken-speaker.ico') + ',0'
+        $shortcut.IconLocation = (Join-Path $PSScriptRoot 'broken-speaker.ico') + ',0'
         $shortcut.Save()
     } elseif (Test-Path -LiteralPath $startupLink) { Remove-Item -LiteralPath $startupLink }
 }
@@ -129,7 +129,7 @@ $form.StartPosition = 'CenterScreen'
 $form.FormBorderStyle = 'FixedDialog'
 $form.MaximizeBox = $false
 $form.Font = New-Object System.Drawing.Font('Segoe UI', 10)
-$iconPath = Join-Path $projectPath 'broken-speaker.ico'
+$iconPath = Join-Path $PSScriptRoot 'broken-speaker.ico'
 $form.Icon = if (Test-Path -LiteralPath $iconPath) { New-Object System.Drawing.Icon($iconPath) } else { [System.Drawing.SystemIcons]::Application }
 $eyebrow = New-Object System.Windows.Forms.Label
 $eyebrow.Text = 'LOCAL AUDIO  /  BROKEN SPEAKER'
@@ -264,7 +264,7 @@ try {
         Update-Status
         $copyButton.PerformClick()
         if ([System.Windows.Forms.Clipboard]::GetText() -ne (Get-PhoneLink)) { throw 'Copy link failed.' }
-        & $pythonPath (Join-Path $projectPath 'verify-flow.py') (Get-PhoneLink)
+        & $pythonPath (Join-Path $projectPath 'scripts/verify_flow.py') (Get-PhoneLink)
         if ($LASTEXITCODE -ne 0) { throw 'Live audio flow failed.' }
         $form.Close()
         if ($form.Visible) { throw 'Close did not hide the control window.' }

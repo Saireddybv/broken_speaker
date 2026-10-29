@@ -39,7 +39,7 @@ Double-click **`Install Tray App.bat`** once. It creates a **Broken Speaker** sh
 
 ## Options
 
-Pass these to `Start Broken Speaker.bat` from a terminal, or to `app.py` directly:
+Pass these to `Start Broken Speaker.bat` from a terminal, or to `python -m broken_speaker` directly:
 
 | Option | What it does |
 | --- | --- |
@@ -50,8 +50,8 @@ Pass these to `Start Broken Speaker.bat` from a terminal, or to `app.py` directl
 Example:
 
 ```powershell
-.\.venv\Scripts\python.exe app.py --list-devices
-.\.venv\Scripts\python.exe app.py --device "Headphones"
+.\.venv\Scripts\python.exe -m broken_speaker --list-devices
+.\.venv\Scripts\python.exe -m broken_speaker --device "Headphones"
 ```
 
 ## Troubleshooting
@@ -64,12 +64,12 @@ Example:
 | **Audio stops when the iPhone locks** | Keep Safari open in the foreground and turn off Auto-Lock while listening. iOS may pause browser audio in the background. |
 | **Delay or dropouts** | Use 5 GHz Wi-Fi, stay near the router, close other Safari tabs and turn off Low Power Mode. |
 | **Echo or feedback** | Use headphones on the phone or turn the laptop's physical speaker down. |
-| **Double-clicking the `.bat` does nothing** | Right-click `start.ps1` and choose **Run with PowerShell** to see the error. |
+| **Double-clicking the `.bat` does nothing** | Right-click `windows\start.ps1` and choose **Run with PowerShell** to see the error. |
 
 ## How it works
 
 ```
-Windows audio ──WASAPI loopback──► app.py (FastAPI) ──WebSocket, 10 ms PCM chunks──► Safari (Web Audio API)
+Windows audio ──WASAPI loopback──► broken_speaker (FastAPI) ──WebSocket, 10 ms PCM chunks──► Safari (Web Audio API)
 ```
 
 The Python service captures 16-bit stereo PCM at 48 kHz from your default Windows output using a low-latency WASAPI loopback stream. It sends 10 ms chunks over a WebSocket. The web page keeps a small adaptive buffer and plays the stream with the Web Audio API. If the phone falls behind, old chunks are dropped so the delay doesn't keep growing.
@@ -85,18 +85,27 @@ The Python service captures 16-bit stereo PCM at 48 kHz from your default Window
 py -3 -m venv .venv
 .venv\Scripts\python -m pip install -r requirements-dev.txt
 .venv\Scripts\python -m pytest
-.venv\Scripts\python app.py
+.venv\Scripts\python -m broken_speaker
 ```
 
-`verify-flow.py http://127.0.0.1:8000` runs an end-to-end check against a running server. It plays a short test tone and confirms that real audio packets arrive.
+`python scripts/verify_flow.py http://127.0.0.1:8000` runs an end-to-end check against a running server. It plays a short test tone and confirms that real audio packets arrive.
 
-| File | Purpose |
-| --- | --- |
-| `app.py` | Audio capture and web server |
-| `static/` | iPhone player page |
-| `tray.ps1`, `setup-tray.ps1` | Windows tray controller and installer |
-| `make-qr.py`, `make-icon.ps1` | Local QR code and icon generation |
-| `tests/` | Unit tests |
+### Project layout
+
+```
+broken_speaker/
+├── Start Broken Speaker.bat   ← double-click to stream
+├── Install Tray App.bat       ← double-click once for the tray icon
+├── broken_speaker/            Python package
+│   ├── app.py                 audio capture + web server
+│   ├── qr.py                  local QR code generator
+│   └── static/                iPhone player page (HTML/JS/CSS)
+├── windows/                   PowerShell launcher, tray app, installer, icon
+├── scripts/verify_flow.py     end-to-end check against a running server
+├── tests/                     unit tests
+├── requirements.txt           runtime dependencies
+└── requirements-dev.txt       + test dependencies
+```
 
 Issues and pull requests are welcome.
 

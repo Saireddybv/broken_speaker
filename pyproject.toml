@@ -1,0 +1,15 @@
+[project]
+name = "broken-speaker"
+version = "1.0.0"
+description = "Stream Windows system audio to your phone's browser over local Wi-Fi"
+readme = "README.md"
+license = {text = "MIT"}
+authors = [{name = "Venkatasai Reddy Barri"}]
+requires-python = ">=3.11"
+
+[project.urls]
+Homepage = "https://github.com/Saireddybv/broken_speaker"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]

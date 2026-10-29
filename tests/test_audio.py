@@ -2,7 +2,7 @@ import asyncio
 
 import pytest
 
-from app import choose_loopback, offer_latest
+from broken_speaker.app import choose_loopback, offer_latest
 
 
 def test_choose_loopback_prefers_default_output() -> None:

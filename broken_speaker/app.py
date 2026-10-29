@@ -251,7 +251,7 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-if __name__ == "__main__":
+def main() -> None:
     args = parse_args()
     if args.list_devices:
         audio = pyaudio.PyAudio()
@@ -265,3 +265,7 @@ if __name__ == "__main__":
     bridge.device_query = args.device
     print(f"\nOpen this on your iPhone (same Wi-Fi): http://{local_ip()}:{args.port}\n")
     uvicorn.run(app, host=args.host, port=args.port, log_level="info")
+
+
+if __name__ == "__main__":
+    main()

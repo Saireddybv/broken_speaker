@@ -1,5 +1,5 @@
 $ErrorActionPreference = "Stop"
-$ProjectDir = Split-Path -Parent $MyInvocation.MyCommand.Path
+$ProjectDir = Split-Path -Parent $PSScriptRoot
 Set-Location -LiteralPath $ProjectDir
 
 if (-not (Test-Path -LiteralPath ".venv\Scripts\python.exe")) {
@@ -19,4 +19,4 @@ if ($LASTEXITCODE -ne 0) { throw "Dependency installation failed. Check your int
 
 Write-Host "`nStarting Broken Speaker. Allow Python through Windows Firewall on Private networks if prompted."
 Write-Host "Press Ctrl+C to stop.`n"
-& ".venv\Scripts\python.exe" app.py @args
+& ".venv\Scripts\python.exe" -m broken_speaker @args
